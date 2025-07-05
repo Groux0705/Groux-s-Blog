@@ -4,11 +4,12 @@ import type { BlogPost } from '../types';
 
 interface BlogCardProps {
   post: BlogPost;
+  mode: 'view' | 'author';
   onEdit: (post: BlogPost) => void;
   onView: (post: BlogPost) => void;
 }
 
-export function BlogCard({ post, onEdit, onView }: BlogCardProps) {
+export function BlogCard({ post, mode, onEdit, onView }: BlogCardProps) {
   return (
     <article className="card" style={{ cursor: 'pointer' }}>
       <div onClick={() => onView(post)}>
@@ -79,26 +80,31 @@ export function BlogCard({ post, onEdit, onView }: BlogCardProps) {
         paddingTop: '1rem',
         borderTop: '1px solid var(--border)'
       }}>
-        <span style={{
-          backgroundColor: post.published ? '#10b981' : '#f59e0b',
-          color: 'white',
-          padding: '0.25rem 0.5rem',
-          borderRadius: 'var(--radius)',
-          fontSize: '0.75rem',
-          fontWeight: '500'
-        }}>
-          {post.published ? 'Published' : 'Draft'}
-        </span>
-        <button 
-          className="btn btn-secondary"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(post);
-          }}
-        >
-          <Edit2 size={14} />
-          Edit
-        </button>
+        {mode === 'author' && (
+          <span style={{
+            backgroundColor: post.published ? '#10b981' : '#f59e0b',
+            color: 'white',
+            padding: '0.25rem 0.5rem',
+            borderRadius: 'var(--radius)',
+            fontSize: '0.75rem',
+            fontWeight: '500'
+          }}>
+            {post.published ? 'Published' : 'Draft'}
+          </span>
+        )}
+        {mode === 'view' && <div />}
+        {mode === 'author' && (
+          <button 
+            className="btn btn-secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(post);
+            }}
+          >
+            <Edit2 size={14} />
+            Edit
+          </button>
+        )}
       </div>
     </article>
   );

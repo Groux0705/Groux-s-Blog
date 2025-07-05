@@ -4,11 +4,12 @@ import type { BlogPost } from '../types';
 
 interface BlogViewProps {
   post: BlogPost;
+  mode: 'view' | 'author';
   onClose: () => void;
   onEdit: (post: BlogPost) => void;
 }
 
-export function BlogView({ post, onClose, onEdit }: BlogViewProps) {
+export function BlogView({ post, mode, onClose, onEdit }: BlogViewProps) {
   return (
     <div style={{
       position: 'fixed',
@@ -60,16 +61,18 @@ export function BlogView({ post, onClose, onEdit }: BlogViewProps) {
                 <Calendar size={16} />
                 {format(post.createdAt, 'MMMM d, yyyy')}
               </div>
-              <span style={{
-                backgroundColor: post.published ? '#10b981' : '#f59e0b',
-                color: 'white',
-                padding: '0.25rem 0.5rem',
-                borderRadius: 'var(--radius)',
-                fontSize: '0.75rem',
-                fontWeight: '500'
-              }}>
-                {post.published ? 'Published' : 'Draft'}
-              </span>
+              {mode === 'author' && (
+                <span style={{
+                  backgroundColor: post.published ? '#10b981' : '#f59e0b',
+                  color: 'white',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: 'var(--radius)',
+                  fontSize: '0.75rem',
+                  fontWeight: '500'
+                }}>
+                  {post.published ? 'Published' : 'Draft'}
+                </span>
+              )}
             </div>
             {post.tags.length > 0 && (
               <div style={{ 
@@ -100,13 +103,15 @@ export function BlogView({ post, onClose, onEdit }: BlogViewProps) {
             )}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => onEdit(post)}
-              className="btn btn-secondary"
-            >
-              <Edit2 size={16} />
-              Edit
-            </button>
+            {mode === 'author' && (
+              <button
+                onClick={() => onEdit(post)}
+                className="btn btn-secondary"
+              >
+                <Edit2 size={16} />
+                Edit
+              </button>
+            )}
             <button
               onClick={onClose}
               style={{
