@@ -1,4 +1,4 @@
-import { Calendar, User, Tag, Edit2 } from 'lucide-react';
+import { Calendar, User, Tag, Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { BlogPost } from '../types';
 
@@ -7,9 +7,10 @@ interface BlogCardProps {
   mode: 'view' | 'author';
   onEdit: (post: BlogPost) => void;
   onView: (post: BlogPost) => void;
+  onDelete?: (post: BlogPost) => void;
 }
 
-export function BlogCard({ post, mode, onEdit, onView }: BlogCardProps) {
+export function BlogCard({ post, mode, onEdit, onView, onDelete }: BlogCardProps) {
   return (
     <article className="card" style={{ cursor: 'pointer' }}>
       <div onClick={() => onView(post)}>
@@ -94,16 +95,37 @@ export function BlogCard({ post, mode, onEdit, onView }: BlogCardProps) {
         )}
         {mode === 'view' && <div />}
         {mode === 'author' && (
-          <button 
-            className="btn btn-secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(post);
-            }}
-          >
-            <Edit2 size={14} />
-            Edit
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button 
+              className="btn btn-secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(post);
+              }}
+            >
+              <Edit2 size={14} />
+              Edit
+            </button>
+            {onDelete && (
+              <button 
+                className="btn btn-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.confirm(`Are you sure you want to delete "${post.title}"?`)) {
+                    onDelete(post);
+                  }
+                }}
+                style={{
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: 'none'
+                }}
+              >
+                <Trash2 size={14} />
+                Delete
+              </button>
+            )}
+          </div>
         )}
       </div>
     </article>

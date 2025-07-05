@@ -3,9 +3,10 @@ import { Search, PenTool, LogOut } from 'lucide-react';
 import { BlogCard } from './BlogCard';
 import { BlogForm } from './BlogForm';
 import { BlogView } from './BlogView';
+import { Pagination } from './Pagination';
 import { useAuth } from '../contexts/AuthContext';
 import type { BlogPost, NewBlogPost } from '../types';
-import { loadPosts, savePosts, createPost, updatePost } from '../utils/storage';
+import { loadPosts, savePosts, createPost, updatePost, deletePost } from '../utils/storage';
 
 export function AdminLayout() {
   const { logout } = useAuth();
@@ -16,6 +17,8 @@ export function AdminLayout() {
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | undefined>();
   const [viewingPost, setViewingPost] = useState<BlogPost | undefined>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   useEffect(() => {
     const loadedPosts = loadPosts();
@@ -39,6 +42,7 @@ export function AdminLayout() {
     }
 
     setFilteredPosts(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [posts, searchQuery, selectedTag]);
 
   const handleCreatePost = () => {
@@ -82,11 +86,29 @@ export function AdminLayout() {
     setViewingPost(undefined);
   };
 
+  const handleDeletePost = (post: BlogPost) => {
+    const updatedPosts = deletePost(post.id, posts);
+    setPosts(updatedPosts);
+    savePosts(updatedPosts);
+    setViewingPost(undefined);
+  };
+
   const handleLogout = () => {
     logout();
   };
 
   const allTags = Array.from(new Set(posts.flatMap(post => post.tags))).sort();
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPosts = filteredPosts.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
@@ -185,21 +207,32 @@ export function AdminLayout() {
             </p>
           </div>
         ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
-            gap: '1.5rem' 
-          }}>
-            {filteredPosts.map(post => (
-              <BlogCard
-                key={post.id}
-                post={post}
-                mode="author"
-                onEdit={handleEditPost}
-                onView={handleViewPost}
-              />
-            ))}
-          </div>
+          <>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
+              gap: '1.5rem' 
+            }}>
+              {currentPosts.map(post => (
+                <BlogCard
+                  key={post.id}
+                  post={post}
+                  mode="author"
+                  onEdit={handleEditPost}
+                  onView={handleViewPost}
+                  onDelete={handleDeletePost}
+                />
+              ))}
+            </div>
+            
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredPosts.length}
+            />
+          </>
         )}
       </main>
 

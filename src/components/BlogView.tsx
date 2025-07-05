@@ -127,17 +127,14 @@ export function BlogView({ post, mode, onClose, onEdit }: BlogViewProps) {
           </div>
         </div>
 
-        <div style={{
-          lineHeight: '1.7',
-          fontSize: '1rem',
-          color: 'var(--foreground)'
-        }}>
-          {post.content.split('\n').map((paragraph, index) => (
-            <p key={index} style={{ marginBottom: '1rem' }}>
-              {paragraph}
-            </p>
-          ))}
-        </div>
+        <div 
+          style={{
+            lineHeight: '1.7',
+            fontSize: '1rem',
+            color: 'var(--foreground)'
+          }}
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
       </div>
     </div>
   );

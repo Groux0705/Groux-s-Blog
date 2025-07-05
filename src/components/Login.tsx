@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Lock, User, AlertCircle } from 'lucide-react';
+import { hashPassword, validateInput, createSecureCredentials } from '../utils/sanitize';
 
 interface LoginProps {
   onLogin: (success: boolean) => void;
@@ -16,13 +17,30 @@ export function Login({ onLogin }: LoginProps) {
     setError('');
     setLoading(true);
 
-    // Fixed credentials
-    const ADMIN_USERNAME = 'admin';
-    const ADMIN_PASSWORD = 'password123';
+    // Validate inputs
+    if (!validateInput(username, 'username')) {
+      setError('Invalid username format');
+      setLoading(false);
+      return;
+    }
+
+    if (!password || password.length < 8) {
+      setError('Password must be at least 8 characters');
+      setLoading(false);
+      return;
+    }
+
+    // Get credentials from environment or use secure defaults
+    const credentials = createSecureCredentials();
+    const inputPasswordHash = hashPassword(password);
 
     setTimeout(() => {
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      if (username === credentials.username && inputPasswordHash === credentials.passwordHash) {
+        // Create a session token (simple for demo)
+        const sessionToken = btoa(Date.now().toString() + Math.random().toString());
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('sessionToken', sessionToken);
+        localStorage.setItem('sessionExpiry', (Date.now() + 24 * 60 * 60 * 1000).toString()); // 24 hours
         onLogin(true);
       } else {
         setError('Invalid username or password');

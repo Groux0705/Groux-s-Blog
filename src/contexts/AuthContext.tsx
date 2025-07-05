@@ -13,10 +13,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check if user is already authenticated
+    // Check if user is already authenticated and session is valid
     const authStatus = localStorage.getItem('isAuthenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
+    const sessionToken = localStorage.getItem('sessionToken');
+    const sessionExpiry = localStorage.getItem('sessionExpiry');
+    
+    if (authStatus === 'true' && sessionToken && sessionExpiry) {
+      const expiryTime = parseInt(sessionExpiry, 10);
+      const currentTime = Date.now();
+      
+      if (currentTime < expiryTime) {
+        setIsAuthenticated(true);
+      } else {
+        // Session expired, clean up
+        logout();
+      }
     }
   }, []);
 
@@ -28,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('sessionToken');
+    localStorage.removeItem('sessionExpiry');
   };
 
   return (

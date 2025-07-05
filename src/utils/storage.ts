@@ -1,4 +1,5 @@
 import type { BlogPost, NewBlogPost } from '../types';
+import { sanitizeText, sanitizeHtml } from './sanitize';
 
 const STORAGE_KEY = 'modernblog_posts';
 
@@ -33,22 +34,45 @@ export function loadPosts(): BlogPost[] {
 
 export function createPost(newPost: NewBlogPost): BlogPost {
   const now = new Date();
+  
+  // Sanitize input data
+  const sanitizedPost = {
+    title: sanitizeText(newPost.title),
+    content: sanitizeHtml(newPost.content),
+    author: sanitizeText(newPost.author),
+    tags: newPost.tags.map(tag => sanitizeText(tag)).filter(tag => tag.length > 0),
+    published: Boolean(newPost.published)
+  };
+  
   return {
     id: generateId(),
-    ...newPost,
-    excerpt: generateExcerpt(newPost.content),
+    ...sanitizedPost,
+    excerpt: generateExcerpt(sanitizedPost.content),
     createdAt: now,
     updatedAt: now
   };
 }
 
 export function updatePost(existingPost: BlogPost, updates: NewBlogPost): BlogPost {
+  // Sanitize input data
+  const sanitizedUpdates = {
+    title: sanitizeText(updates.title),
+    content: sanitizeHtml(updates.content),
+    author: sanitizeText(updates.author),
+    tags: updates.tags.map(tag => sanitizeText(tag)).filter(tag => tag.length > 0),
+    published: Boolean(updates.published)
+  };
+  
   return {
     ...existingPost,
-    ...updates,
-    excerpt: generateExcerpt(updates.content),
+    ...sanitizedUpdates,
+    excerpt: generateExcerpt(sanitizedUpdates.content),
     updatedAt: new Date()
   };
+}
+
+export function deletePost(postId: string, posts: BlogPost[]): BlogPost[] {
+  return posts.filter(post => post.id !== postId);
 }
 
 function getSamplePosts(): BlogPost[] {

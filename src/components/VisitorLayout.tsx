@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, PenTool } from 'lucide-react';
 import { BlogCard } from './BlogCard';
 import { BlogView } from './BlogView';
+import { Pagination } from './Pagination';
 import type { BlogPost } from '../types';
 import { loadPosts } from '../utils/storage';
 
@@ -11,6 +12,8 @@ export function VisitorLayout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [viewingPost, setViewingPost] = useState<BlogPost | undefined>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(9);
 
   useEffect(() => {
     const loadedPosts = loadPosts();
@@ -36,6 +39,7 @@ export function VisitorLayout() {
     }
 
     setFilteredPosts(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [posts, searchQuery, selectedTag]);
 
   const handleViewPost = (post: BlogPost) => {
@@ -47,6 +51,17 @@ export function VisitorLayout() {
   };
 
   const allTags = Array.from(new Set(posts.flatMap(post => post.tags))).sort();
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPosts = filteredPosts.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
@@ -142,21 +157,31 @@ export function VisitorLayout() {
             </p>
           </div>
         ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
-            gap: '1.5rem' 
-          }}>
-            {filteredPosts.map(post => (
-              <BlogCard
-                key={post.id}
-                post={post}
-                mode="view"
-                onEdit={() => {}} // No edit functionality in visitor mode
-                onView={handleViewPost}
-              />
-            ))}
-          </div>
+          <>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
+              gap: '1.5rem' 
+            }}>
+              {currentPosts.map(post => (
+                <BlogCard
+                  key={post.id}
+                  post={post}
+                  mode="view"
+                  onEdit={() => {}} // No edit functionality in visitor mode
+                  onView={handleViewPost}
+                />
+              ))}
+            </div>
+            
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredPosts.length}
+            />
+          </>
         )}
       </main>
 
