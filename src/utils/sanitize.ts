@@ -14,10 +14,6 @@ export function sanitizeText(text: string): string {
 export function sanitizeHtml(html: string): string {
   if (typeof html !== 'string') return '';
   
-  // Allow basic formatting tags but remove dangerous ones
-  const allowedTags = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li', 'a', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-  const allowedAttributes = ['href', 'src', 'alt', 'title', 'target'];
-  
   // This is a basic sanitizer - in production, use a library like DOMPurify
   let sanitized = html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags

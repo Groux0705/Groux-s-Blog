@@ -465,7 +465,7 @@ export function BlogForm({ post, onSave, onCancel }: BlogFormProps) {
             {/* Rich Text Editor */}
             <div
               ref={editorRef}
-              contentEditable
+              contentEditable={true}
               onInput={handleEditorInput}
               style={{
                 minHeight: '300px',
@@ -480,7 +480,7 @@ export function BlogForm({ post, onSave, onCancel }: BlogFormProps) {
                 outline: 'none'
               }}
               suppressContentEditableWarning={true}
-              placeholder="Write your blog post content..."
+              data-placeholder="Write your blog post content..."
             />
             {errors.content && (
               <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Upload, X, Image } from 'lucide-react';
+import { Image } from 'lucide-react';
 
 interface ImageUploadProps {
   onImageInsert: (imageHtml: string) => void;
